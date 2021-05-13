@@ -1,4 +1,6 @@
 
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
 import 'package:flutterwg/service/service_method.dart';
@@ -259,6 +261,46 @@ class Recommend extends StatelessWidget {
     );
   }
 }
+
+//todo 楼层小部件
+class FloorTitle extends StatelessWidget {
+
+  final String picture_address;
+
+  const FloorTitle({Key key, this.picture_address}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(8.0),
+      child: Image.network(picture_address),
+    );
+  }
+}
+
+class FloorContent extends StatelessWidget {
+  final List floorGoodsList;
+
+  const FloorContent({Key key, this.floorGoodsList}) : super(key: key);
+
+
+  Widget _goodsItem(Map goods){
+    return Container(
+      width: ScreenUtil().screenWidth / 2,
+      child: InkWell(
+        onTap: (){print("点击");},
+        
+      ),
+    );
+  }
+
+
+  @override
+  Widget build(BuildContext context) {
+    return Container();
+  }
+}
+
 
 
 
