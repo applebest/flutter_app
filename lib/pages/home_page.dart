@@ -1,4 +1,5 @@
 
+import 'dart:developer';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -7,6 +8,7 @@ import 'package:flutterwg/service/service_method.dart';
 import 'dart:convert';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_easyrefresh/easy_refresh.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -16,9 +18,19 @@ class HomePage extends StatefulWidget {
 // 保持页面 AutomaticKeepAliveClientMixin
 class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin {
 
+  int page = 1;
+  List<Map> hotGoodsList = [];
+
   // 重写
   @override
   bool get wantKeepAlive => true;
+
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
 
 
   @override
@@ -44,20 +56,56 @@ class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin 
               String leaderImage = data['data']['shopInfo']['leaderImage']; //店长图片
               // todo 推荐部分
               List<Map> recommendList = (data['data']['recommend'] as List).cast(); // 商品推荐
+              String floor1Title = data['data']['floor1Pic']['PICTURE_ADDRESS']; //楼层1的标题图片
+              String floor2Title = data['data']['floor2Pic']['PICTURE_ADDRESS']; //楼层1的标题图片
+              String floor3Title = data['data']['floor3Pic']['PICTURE_ADDRESS']; //楼层1的标题图片
+              List<Map> floor1 = (data['data']['floor1'] as List).cast(); //楼层1商品和图片
+              List<Map> floor2 = (data['data']['floor2'] as List).cast(); //楼层1商品和图片
+              List<Map> floor3 = (data['data']['floor3'] as List).cast(); //楼层1商品和图片
+
+              return EasyRefresh(
+                header: ClassicalHeader(
+
+                ),
+                footer: ClassicalFooter(
+                    bgColor: Colors.white,
+                    textColor: Colors.pink,
+                    infoColor: Colors.pink,
+                    noMoreText: "",
+                    infoText: "加载中",
+                    loadReadyText: "上拉加载...",
+                    loadedText: "加载完成"
+                ),
+                onLoad: () async {
+
+                  _getHotGoods();
+                },
+
+                onRefresh: () async{
+                  return Future.value(true);
+                },
 
 
 
-              return SingleChildScrollView(
-                child: Column(
+                child:ListView(
                   children: <Widget>[
                     SwiperDiy(swiperDateList: swiper,), // 轮播图小部件
                     TopNavigator(navigatorList: navigatorList), //导航小部件
                     AdBanner(adPicture: adPicture,), // 广告部件
                     LeaderPhone(leaderImage: leaderImage,leaderPhone: leaderPhone), //打电话小部件
-                    Recommend(recommendList: recommendList),
+                    Recommend(recommendList: recommendList), // 商品推荐
+                    FloorTitle(picture_address: floor1Title),
+                    FloorContent(floorGoodsList: floor1),
+                    FloorTitle(picture_address: floor2Title),
+                    FloorContent(floorGoodsList: floor2),
+                    FloorTitle(picture_address: floor3Title),
+                    FloorContent(floorGoodsList: floor3),
+                    _hotGoods(),
                   ],
-                )
+                ) ,
+
               );
+
             }else{
               return Center(
                 child: Text("加载中...."),
@@ -69,6 +117,89 @@ class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin 
     );
 
   }
+
+  void _getHotGoods(){
+    var formData = {"page":page};
+    request("homePageBelowConten",formData: formData).then((value){
+      var data = json.decode(value.toString());
+
+      print("火爆专区数据......${data}");
+      List<Map> newGoodsList = (data["data"] as List).cast();
+      setState(() {
+        hotGoodsList.addAll(newGoodsList);
+        page++;
+      });
+
+    });
+
+  }
+
+  Widget hotTitle = Container(
+    margin: EdgeInsets.only(top: 5.0),
+    alignment: Alignment.center,
+    color: Colors.transparent,
+    padding: EdgeInsets.all(5),
+    child: Text("火爆专区"),
+  );
+
+  Widget _wrapList(){
+    if(hotGoodsList.length != 0){
+        List<Widget> listWidget = hotGoodsList.map((e){
+          return InkWell(
+            onTap: (){ print("dddddddd"); },
+            child: Container(
+              width: ScreenUtil().screenWidth / 2 - 10,
+              color: Colors.white,
+              padding: EdgeInsets.all(5.0),
+              margin: EdgeInsets.only(bottom: 3.0),
+              child: Column(
+                children: [
+                  Image.network(e["image"],width: ScreenUtil().screenWidth / 2 - 10),
+                  Text(e["name"],maxLines: 1,overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: Colors.pink,
+                      fontSize: 26.sp
+                    ),
+                  ),
+                  Row(
+                    children: [
+                      Text("￥${e["mallPrice"]}"),
+                      Text("￥${e["price"]}",
+                        style: TextStyle(
+                          color: Colors.black26,
+                          decoration: TextDecoration.lineThrough
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          );
+        }).toList();
+
+        return Wrap(
+          spacing: 2,
+          children: listWidget,
+        );
+    }else{
+       return Text("");
+    }
+  }
+
+  Widget _hotGoods(){
+    return Container(
+      child: Column(
+        children: [
+          hotTitle,
+          _wrapList(),
+        ],
+      ),
+    );
+
+  }
+
+
   
 }
 
@@ -278,18 +409,43 @@ class FloorTitle extends StatelessWidget {
   }
 }
 
+//todo 楼层内容
 class FloorContent extends StatelessWidget {
   final List floorGoodsList;
 
   const FloorContent({Key key, this.floorGoodsList}) : super(key: key);
 
 
+  Widget _firstRow(){
+    return Row(
+      children: <Widget>[
+        _goodsItem(floorGoodsList[0]),
+        Column(
+          children: [
+            _goodsItem(floorGoodsList[1]),
+            _goodsItem(floorGoodsList[2]),
+          ],
+        )
+      ],
+    );
+  }
+
+  Widget _otherGoods(){
+    return Row(
+      children: [
+        _goodsItem(floorGoodsList[3]),
+        _goodsItem(floorGoodsList[4]),
+      ],
+    );
+  }
+
+
   Widget _goodsItem(Map goods){
     return Container(
       width: ScreenUtil().screenWidth / 2,
       child: InkWell(
-        onTap: (){print("点击");},
-        
+        onTap: (){print("点击了楼层商品 ${goods["image"]} ");},
+        child: Image.network(goods["image"]),
       ),
     );
   }
@@ -297,9 +453,17 @@ class FloorContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return Container(
+      child: Column(
+        children: [
+          _firstRow(),
+          _otherGoods()
+        ],
+      ),
+    );
   }
 }
+
 
 
 
