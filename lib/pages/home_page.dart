@@ -259,7 +259,7 @@ class TopNavigator extends StatelessWidget {
       height: 240.h,
       padding: EdgeInsets.all(3.0),
       child: GridView.count(
-//        physics: NeverScrollableScrollPhysics(),   // 设置不可滑动
+        physics: NeverScrollableScrollPhysics(),   // 设置不可滑动
         crossAxisCount:5,
           padding: EdgeInsets.all(5.0),
         children:navigatorList.map((e) {

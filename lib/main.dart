@@ -1,10 +1,22 @@
 import 'package:flutter/material.dart';
 import 'pages/Index_page.dart';
-
+import 'package:provider/provider.dart';
+import 'package:flutterwg/provide/counter.dart';
+import 'provide/child_category.dart';
 
 void main() {
 
-  runApp(MyApp());
+
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => Counter()),
+        ChangeNotifierProvider(create: (_) => ChildCategory()),
+
+      ],
+      child: MyApp(),
+    )
+  );
 }
 
 class MyApp extends StatelessWidget {
