@@ -3,6 +3,7 @@ import 'pages/Index_page.dart';
 import 'package:provider/provider.dart';
 import 'package:flutterwg/provide/counter.dart';
 import 'provide/child_category.dart';
+import 'provide/category_goods_list.dart';
 
 void main() {
 
@@ -11,7 +12,8 @@ void main() {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => Counter()),
-        ChangeNotifierProvider(create: (_) => ChildCategory()),
+        ChangeNotifierProvider(create: (_) => ChildCategory()), //大类数据传参
+        ChangeNotifierProvider(create: (_) => CategoryGoodsListProvide() ), //商品分类数据交互
 
       ],
       child: MyApp(),

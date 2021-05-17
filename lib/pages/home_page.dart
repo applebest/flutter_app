@@ -25,11 +25,20 @@ class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin 
   @override
   bool get wantKeepAlive => true;
 
+  EasyRefreshController _controller;
+
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    _controller = EasyRefreshController();
+  }
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    _controller.dispose();
+    super.dispose();
   }
 
 
@@ -64,21 +73,32 @@ class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin 
               List<Map> floor3 = (data['data']['floor3'] as List).cast(); //楼层1商品和图片
 
               return EasyRefresh(
-                header: ClassicalHeader(
-
-                ),
+                enableControlFinishRefresh:false,
+                controller: _controller,
+                bottomBouncing: true,
                 footer: ClassicalFooter(
-                    bgColor: Colors.white,
-                    textColor: Colors.pink,
-                    infoColor: Colors.pink,
-                    noMoreText: "",
-                    infoText: "加载中",
-                    loadReadyText: "上拉加载...",
-                    loadedText: "加载完成"
+                  bgColor: Colors.white,
+                  //  更多信息文字颜色
+                  infoColor: Colors.black,
+                  // 字体颜色
+                  textColor: Colors.black,
+                  // 加载失败时显示的文字
+                  loadText: "加载...",
+                  // 没有更多时显示的文字
+                  noMoreText: '',
+                  // 是否显示提示信息
+                  showInfo: false,
+                  // 正在加载时的文字
+                  loadingText: "加载中...",
+                  // 准备加载时显示的文字
+                  loadReadyText:"",
+                  // 加载完成显示的文字
+                  loadedText: "加载完成",
                 ),
-                onLoad: () async {
 
+                onLoad: () async {
                   _getHotGoods();
+                  _controller.finishLoad();
                 },
 
                 onRefresh: () async{
