@@ -12,9 +12,16 @@ class CategoryGoodsListProvide with ChangeNotifier{
     if(list == null){
       _goodsList = [];
     }else{
-      _goodsList  = list;
+      _goodsList = list;
     }
     notifyListeners();
   }
+
+  getMoreList(List<CategoryListData> list){
+
+    _goodsList.addAll(list);
+    notifyListeners();
+  }
+
 
 }

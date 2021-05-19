@@ -15,9 +15,14 @@ class ChildCategory with ChangeNotifier{
   String _subId = "";
   String get subId => _subId;
 
+  int page = 1;  // 列表页数
+
+  String noMoreText = ""; // 显示没有数据的文字
 
   // 大类切换逻辑
   getChildCategory(List<BxMallSubDto> list ,String categoryId){
+    page = 1;
+    noMoreText = "";
     _childIndex = 0;
     _categoryId = categoryId;
     BxMallSubDto all =  BxMallSubDto();
@@ -32,8 +37,20 @@ class ChildCategory with ChangeNotifier{
 
   // 子类切换逻辑
   changeChildIndex(index,String id){
+    page = 1;
+    noMoreText = "";
     _childIndex = index;
     _subId = id;
+    notifyListeners();
+  }
+
+  // 页码加1
+  addPage(){
+    page++;
+  }
+
+  changeNoreText(String text){
+    noMoreText = text;
     notifyListeners();
   }
 

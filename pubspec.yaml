@@ -23,12 +23,27 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  #网络库
   dio: ^4.0.0
+  #轮播图
   flutter_swiper: ^1.1.6
+  # 屏幕适配
   flutter_screenutil: ^5.0.0+2
+  # 跳转
   url_launcher: ^6.0.3
+  #刷新控件
   flutter_easyrefresh: ^2.2.1
+  # 状态管理
   provider: ^5.0.0
+  # 吐司
+  fluttertoast: ^8.0.6
+  #路由管理
+  fluro: ^2.0.3
+  #解析html
+  flutter_html: ^2.0.0
+  #简单持久化
+  shared_preferences: ^2.0.5
+
 
 
   # The following adds the Cupertino Icons font to your application.

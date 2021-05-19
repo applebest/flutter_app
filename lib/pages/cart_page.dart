@@ -1,7 +1,7 @@
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutterwg/provide/counter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 //class CartPage extends StatefulWidget {
 //  @override
@@ -22,63 +22,71 @@ import 'package:flutterwg/provide/counter.dart';
 //  }
 //}
 
-class CartPage extends StatelessWidget {
+class CartPage extends StatefulWidget {
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child:Column(
-          children: [
-            Number(),
-            Mybutton(),
-          ],
-        ),
-      ),
-    );
-  }
+  _CarPageState createState() => _CarPageState();
 }
 
-class Number extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.only(top: 200),
-//      margin: EdgeInsets.only(top: 200),
+class _CarPageState extends State<CartPage> {
+  List<String> testList = [];
 
-      child:
+  void _add() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String temp = "的首付多少老会计风口浪尖";
+    testList.add(temp);
 
-//      Consumer<Counter>(
-//        builder: (context, notifier, child) {
-//          return Text("${notifier.value}");
-//        },
-//      )
-
-      Text(
-//        "${Provider.of<Counter>(context).value}"
-          "${context.watch<Counter>().value}"  // 等价
-      ),
-
-    );
+    prefs.setStringList("testInfo", testList);
+    _show();
   }
-}
 
-class Mybutton extends StatelessWidget {
+  // 查询
+  _show() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    if (prefs.getStringList("testInfo") != null) {
+      setState(() {
+        testList = prefs.getStringList("testInfo");
+      });
+    }
+  }
+
+  _remove() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.remove("testInfo");
+    setState(() {
+      testList = [];
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.only(top: 50),
-      margin: EdgeInsets.only(top: 50),
-      child: ElevatedButton(
-        onPressed:(){
-//          Provider.of<Counter>(context,listen: false).increment();
-          context.read<Counter>().increment();  // 等价
-        },
-        child: Text(
-            "递增+"
-        ),
+      child: Column(
+        children: [
+          Container(
+            height: 500,
+            child: ListView.builder(
+              itemBuilder: (context, index) {
+                return ListTile(
+                  title: Text(testList[index]),
+                );
+              },
+              itemCount: testList.length,
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              _add();
+            },
+            child: Text("增加"),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              _remove();
+            },
+            child: Text("清空"),
+          ),
+        ],
       ),
     );
   }
 }
-
-

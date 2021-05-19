@@ -9,7 +9,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutterwg/provide/child_category.dart';
 import 'package:provider/provider.dart';
 import 'package:flutterwg/provide/category_goods_list.dart';
-
+import 'package:flutter_easyrefresh/easy_refresh.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 
 class CategoryPage extends StatefulWidget {
@@ -255,8 +256,9 @@ class CategoryGoodsList extends StatefulWidget {
 
 class _CategoryGoodsListState extends State<CategoryGoodsList> {
 
+  EasyRefreshController _controller = EasyRefreshController();
 
-
+  ScrollController    _scrollController = ScrollController();
 
   Widget _goodsImage (List<CategoryListData>list,index){
     return Container(
@@ -309,7 +311,9 @@ class _CategoryGoodsListState extends State<CategoryGoodsList> {
 
   Widget _listItemWidget(List<CategoryListData>list, index){
     return InkWell(
-      onTap: (){},
+      onTap: (){
+
+      },
       child: Container(
         padding: EdgeInsets.only(top: 5,bottom: 5),
         decoration: BoxDecoration(
@@ -344,11 +348,71 @@ class _CategoryGoodsListState extends State<CategoryGoodsList> {
     super.initState();
   }
 
+
+
+  Future _onLoad() async{
+
+    _getMoreList();
+
+  }
+
+  Future _onRefresh() async {
+    print("下拉刷新");
+
+  }
+
+
+  _getMoreList() async {
+
+    Provider.of<ChildCategory>(context,listen: false).addPage();
+    var data = {
+      'categoryId': Provider.of<ChildCategory>(context,listen: false).categoryId,
+      'categorySubId': Provider.of<ChildCategory>(context,listen: false).subId,
+      'page': Provider.of<ChildCategory>(context,listen: false).page
+    };
+    await request('getMallGoods', formData: data).then((val) {
+      var data = json.decode(val.toString());
+      CategoryGoodsListModel model = CategoryGoodsListModel.fromJson(data);
+      print("打印model 。。。|${model}");
+      if(model != null && model.data != null && model.data.length > 0){
+        Provider.of<CategoryGoodsListProvide>(context,listen: false).getMoreList(model.data);
+      }else{
+
+        print("到底了============================");
+        Provider.of<ChildCategory>(context,listen: false).changeNoreText("没有更多了");
+
+        Fluttertoast.showToast(
+          msg: "已经到底了",
+          toastLength: Toast.LENGTH_SHORT, // 提示的长短
+          gravity:ToastGravity.CENTER ,    // 提示的位置
+          backgroundColor: Colors.pink,
+          textColor: Colors.white,
+          fontSize: 16 ,
+        );
+
+      }
+
+    });
+  }
+
+
   @override
   Widget build(BuildContext context) {
-
   return  Consumer<CategoryGoodsListProvide>(
     builder:(context,data,child){
+
+      try{
+
+        int page =  Provider.of<ChildCategory>(context,listen: false).page;
+        if(page == 1){
+           // 列表放到最上面
+          _scrollController.jumpTo(0.0);
+        }
+
+
+      }catch(e){
+        print("进入页面第一次初始化${e}");
+      }
 
       bool isEmpty  = data.goodsList.length == 0 ;
 
@@ -357,31 +421,42 @@ class _CategoryGoodsListState extends State<CategoryGoodsList> {
           child:  Container(
             width: 570.w,
 //            height: 980.h,
-            child: isEmpty ? Center(child: Text("暂无数据"),) : ListView.builder(
-              itemCount: data.goodsList.length,
-              itemBuilder: (context,index){
-                return _listItemWidget(data.goodsList, index);
-              },
-            ) ,
+            child: isEmpty ? Center(child: Text("暂无数据"),) :
+              EasyRefresh(
+                  footer: ClassicalFooter(
+
+                    showInfo: false,
+                    bgColor: Colors.white,
+                    //  更多信息文字颜色
+                    infoColor: Colors.pink,
+                    // 字体颜色
+                    textColor: Colors.pink,
+                    loadingText:"加载中...",
+                    // 没有更多时显示的文字  Provider.of<ChildCategory>(context,listen: false).noMoreText
+                    noMoreText: Provider.of<ChildCategory>(context,listen: false).noMoreText,
+                    // 正在加载时的文字
+                    loadedText:"加载完成",
+                    // 准备加载时显示的文字
+                    loadReadyText:"上拉加载....",
+                  ),
+//                  controller: _controller,
+//                  enableControlFinishRefresh: true,
+//                  enableControlFinishLoad: true,
+                  onLoad:_onLoad,
+                  onRefresh:_onRefresh,
+                  child:ListView.builder(
+                    controller: _scrollController,
+                    itemCount: data.goodsList.length,
+                    itemBuilder: (context,index){
+                      return _listItemWidget(data.goodsList, index);
+                    },
+                  )
+              )
           )
 
       );
     },
   );
-
-
-
-//    return Container(
-//      width: 570.w,
-//      height: 980.h,
-//      child: ListView.builder(
-//        itemCount: list.length,
-//        itemBuilder: (context,index){
-//          return _listItemWidget(index);
-//        },
-//      ),
-//    );
-
 
 
   }

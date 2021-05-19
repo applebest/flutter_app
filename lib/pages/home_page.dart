@@ -1,14 +1,15 @@
 
-import 'dart:developer';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
+import 'package:flutterwg/routers/routers.dart';
 import 'package:flutterwg/service/service_method.dart';
 import 'dart:convert';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_easyrefresh/easy_refresh.dart';
+import 'package:flutterwg/routers/application.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -25,19 +26,15 @@ class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin 
   @override
   bool get wantKeepAlive => true;
 
-  EasyRefreshController _controller;
-
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    _controller = EasyRefreshController();
   }
   @override
   void dispose() {
     // TODO: implement dispose
-    _controller.dispose();
     super.dispose();
   }
 
@@ -73,32 +70,23 @@ class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin 
               List<Map> floor3 = (data['data']['floor3'] as List).cast(); //楼层1商品和图片
 
               return EasyRefresh(
-                enableControlFinishRefresh:false,
-                controller: _controller,
-                bottomBouncing: true,
                 footer: ClassicalFooter(
+
                   bgColor: Colors.white,
                   //  更多信息文字颜色
-                  infoColor: Colors.black,
+                  infoColor: Colors.pink,
                   // 字体颜色
-                  textColor: Colors.black,
-                  // 加载失败时显示的文字
-                  loadText: "加载...",
+                  textColor: Colors.pink,
                   // 没有更多时显示的文字
                   noMoreText: '',
-                  // 是否显示提示信息
-                  showInfo: false,
                   // 正在加载时的文字
                   loadingText: "加载中...",
                   // 准备加载时显示的文字
-                  loadReadyText:"",
-                  // 加载完成显示的文字
-                  loadedText: "加载完成",
+                  loadReadyText:"上拉加载....",
                 ),
 
                 onLoad: () async {
                   _getHotGoods();
-                  _controller.finishLoad();
                 },
 
                 onRefresh: () async{
@@ -166,7 +154,9 @@ class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin 
     if(hotGoodsList.length != 0){
         List<Widget> listWidget = hotGoodsList.map((e){
           return InkWell(
-            onTap: (){ print("dddddddd"); },
+            onTap: (){
+              RouterService.enterDetail(context, e["goodsId"]);
+            },
             child: Container(
               width: ScreenUtil().screenWidth / 2 - 10,
               color: Colors.white,
@@ -239,7 +229,13 @@ class SwiperDiy extends StatelessWidget {
       width: 750.w,
       child: Swiper(
         itemBuilder: (context ,index){
-          return Image.network("${swiperDateList[index]["image"]}",fit: BoxFit.fill,);
+          return  InkWell(
+            onTap: (){
+              RouterService.enterDetail(context, swiperDateList[index]["goodsId"]);
+            },
+            child:Image.network("${swiperDateList[index]["image"]}",fit: BoxFit.fill,)
+
+          ) ;
         },
         itemCount: swiperDateList.length,
         pagination:SwiperPagination() ,
@@ -354,10 +350,12 @@ class Recommend extends StatelessWidget {
   }
 
   //图片 小部件
-  Widget _item(index){
+  Widget _item(context, index){
 
     return InkWell(
-      onTap: (){},
+      onTap: (){
+        RouterService.enterDetail(context, recommendList[index]["goodsId"]);
+      },
       child: Container(
         width: 290.w,
         padding: EdgeInsets.all(8),
@@ -393,7 +391,7 @@ class Recommend extends StatelessWidget {
         scrollDirection: Axis.horizontal,
         itemCount: recommendList.length,
         itemBuilder: (context,index){
-          return _item(index);
+          return _item(context,index);
         },
       ),
     );
@@ -436,35 +434,37 @@ class FloorContent extends StatelessWidget {
   const FloorContent({Key key, this.floorGoodsList}) : super(key: key);
 
 
-  Widget _firstRow(){
+  Widget _firstRow(BuildContext context){
     return Row(
       children: <Widget>[
-        _goodsItem(floorGoodsList[0]),
+        _goodsItem(floorGoodsList[0],context),
         Column(
           children: [
-            _goodsItem(floorGoodsList[1]),
-            _goodsItem(floorGoodsList[2]),
+            _goodsItem(floorGoodsList[1],context),
+            _goodsItem(floorGoodsList[2],context),
           ],
         )
       ],
     );
   }
 
-  Widget _otherGoods(){
+  Widget _otherGoods(BuildContext context){
     return Row(
       children: [
-        _goodsItem(floorGoodsList[3]),
-        _goodsItem(floorGoodsList[4]),
+        _goodsItem(floorGoodsList[3],context),
+        _goodsItem(floorGoodsList[4],context),
       ],
     );
   }
 
 
-  Widget _goodsItem(Map goods){
+  Widget _goodsItem(Map goods,BuildContext context){
     return Container(
       width: ScreenUtil().screenWidth / 2,
       child: InkWell(
-        onTap: (){print("点击了楼层商品 ${goods["image"]} ");},
+        onTap: (){
+          RouterService.enterDetail(context, goods["goodsId"]);
+        },
         child: Image.network(goods["image"]),
       ),
     );
@@ -476,8 +476,8 @@ class FloorContent extends StatelessWidget {
     return Container(
       child: Column(
         children: [
-          _firstRow(),
-          _otherGoods()
+          _firstRow(context),
+          _otherGoods(context)
         ],
       ),
     );
