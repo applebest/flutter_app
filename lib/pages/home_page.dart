@@ -51,7 +51,7 @@ class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin 
         builder: (context,snapshot){
             if(snapshot.hasData){
               var data  = json.decode(snapshot.data.toString());
-
+              print("首页数据=====> $data");
               //todo 轮播
               List<Map> swiper = (data["data"]["slides"] as List).cast(); // 轮播图
               // todo 类别列表
