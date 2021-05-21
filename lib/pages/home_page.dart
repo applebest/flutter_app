@@ -42,6 +42,14 @@ class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin 
   @override
   Widget build(BuildContext context) {
 
+//    return Scaffold(
+//      appBar: AppBar(
+//        title: Text("百姓生活+"),
+//      ),
+//      body: Text("暂无数据"),
+//    );
+
+
     return Scaffold(
       appBar: AppBar(
         title: Text("百姓生活+"),
@@ -52,6 +60,12 @@ class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin 
             if(snapshot.hasData){
               var data  = json.decode(snapshot.data.toString());
               print("首页数据=====> $data");
+
+              if(data["data"] == null){
+
+                return Text("暂无数据");
+              }
+
               //todo 轮播
               List<Map> swiper = (data["data"]["slides"] as List).cast(); // 轮播图
               // todo 类别列表

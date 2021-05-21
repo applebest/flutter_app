@@ -41,6 +41,7 @@ Future getHomePageContent() async{
     if(response.statusCode == 200){
       return response.data;
     }else {
+      print('后端接口出现异常，请检测代码和服务器情况.........');
       throw Exception('后端接口出现异常，请检测代码和服务器情况.........');
     }
 

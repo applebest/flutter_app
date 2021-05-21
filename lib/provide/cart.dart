@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutterwg/pages/cart_page/cart_item.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:flutterwg/models/cartInfo.dart';
@@ -21,12 +22,19 @@ class CartProvider with ChangeNotifier {
 
     bool isHave = false;
     int ival = 0;
+    allPrice = 0.0;
+    allGoodsCount = 0;
     tempList.forEach((element) {
       if(element["goodsId"] == goodsId){
         tempList[ival]["count"] = element["count"] + 1;
         cartList[ival].count ++;
         isHave = true;
       }
+      if(element["isCheck"]){
+        allPrice += (cartList[ival].price * cartList[ival].count);
+        allGoodsCount +=  cartList[ival].count;
+      }
+      
       ival++;
     });
     if(!isHave){
@@ -39,9 +47,11 @@ class CartProvider with ChangeNotifier {
         'images': images,
         'isCheck': true //是否已经选择
       };
-
       tempList.add(newGoods);
       cartList.add(CartInfoModel.fromJson(newGoods));
+      allPrice += (price * count);
+      allGoodsCount += count;
+
     }
 
     cartString = json.encode(tempList).toString();
@@ -153,6 +163,45 @@ class CartProvider with ChangeNotifier {
     }
 
     cartString = json.encode(newList).toString();
+    prefs.setString(cartString, "cartInfo");
+    await getCartInfo();
+
+  }
+
+  Future<List<Map>> _getListData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    cartString = prefs.getString("cartInfo");
+    var temp =  cartString == null ? [] : json.decode(cartString.toString()) ;
+    List<Map> tempList = (temp as List).cast();
+    return tempList;
+  }
+
+
+  // 商品数量加减
+  addOrReduceAction(CartInfoModel model ,String todo) async {
+
+    List<Map> tempList = await _getListData();
+    
+    int index = 0;
+    for (int i = 0; i < tempList.length; i++){
+      var item = tempList[i];
+      if(item["goodsId"] == model.goodsId){
+        index  = i;
+        break;
+      }
+    }
+
+    if(todo == "add"){
+
+      model.count ++;
+
+    }else if(model.count > 1){
+      model.count --;
+    }
+
+    tempList[index] = model.toJson();
+    cartString = json.encode(tempList).toString();
+    SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setString(cartString, "cartInfo");
     await getCartInfo();
 

@@ -51,7 +51,7 @@ class CartItem extends StatelessWidget {
       child: Column(
         children: [
           Text(item.goodsName,),
-          CartCount(),
+          CartCount(item),
         ],
       ),
     );

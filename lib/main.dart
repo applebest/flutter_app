@@ -10,6 +10,7 @@ import 'package:flutterwg/routers/routers.dart';
 import 'package:flutterwg/routers/application.dart';
 import 'package:flutterwg/provide/details_info.dart';
 import 'provide/cart.dart';
+import 'provide/current_index.dart';
 
 void main() {
 
@@ -23,6 +24,7 @@ void main() {
         ChangeNotifierProvider(create: (_) => CategoryGoodsListProvide() ), //商品分类数据交互
         ChangeNotifierProvider(create: (_) => DetailsInfoProvide() ), //详情交互
         ChangeNotifierProvider(create: (_) => CartProvider() ), //购物车交互
+        ChangeNotifierProvider(create: (_) => CurrentIndexProvider() ), //改变tabBar下标
       ],
       child: MyApp(),
     )

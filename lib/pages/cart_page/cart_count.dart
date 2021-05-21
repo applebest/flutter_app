@@ -1,58 +1,69 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutterwg/models/cartInfo.dart';
+import 'package:provider/provider.dart';
+import 'package:flutterwg/provide/cart.dart';
 
 class CartCount extends StatelessWidget {
 
+  final  CartInfoModel model;
+
+  CartCount(this.model);
+
   // 减少按钮
-  Widget _reduceBtn(){
+  Widget _reduceBtn(BuildContext context){
 
     return InkWell(
-      onTap: (){},
+      onTap: (){
+        Provider.of<CartProvider>(context,listen: false).addOrReduceAction(model, "reduce");
+      },
       child: Container(
         width: 45.w,
         height: 45.h,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: model.count > 1 ? Colors.white : Colors.black12,
           border: Border(
             right: BorderSide(width: 1,color: Colors.black12)
           )
         ),
-        child: Text("-"),
+        child:model.count > 1? Text("-") : Text(" ")
       ),
     );
   }
 
 
   // 加号按钮
-  Widget _addBtn(){
+  Widget _addBtn(BuildContext context){
 
     return InkWell(
-      onTap: (){},
+      onTap: (){
+        Provider.of<CartProvider>(context,listen: false).addOrReduceAction(model, "add");
+      },
       child: Container(
         width: 45.w,
         height: 45.h,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-            color: Colors.white,
+            color:Colors.white,
             border: Border(
                 left: BorderSide(width: 1,color: Colors.black12)
             )
         ),
-        child: Text("+"),
+        child:Text("+"),
       ),
     );
   }
 
   // 中间数量显示区域
-  Widget _centerNumber(){
+  Widget _centerNumber(BuildContext context){
 
     return Container(
       width: 70.w,
       height:45.h,
       alignment: Alignment.center,
       color: Colors.white,
-      child: Text("1"),
+      child: Text("${model.count}"),
     );
   }
 
@@ -69,9 +80,9 @@ class CartCount extends StatelessWidget {
 
       child: Row(
         children: [
-          _reduceBtn(),
-          _centerNumber(),
-          _addBtn(),
+          _reduceBtn(context),
+          _centerNumber(context),
+          _addBtn(context),
 
         ],
       ),
